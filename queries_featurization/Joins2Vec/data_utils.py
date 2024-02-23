@@ -27,12 +27,12 @@ class Corpus(object):
     def scan_corpus(self):
         word_to_freq_map = defaultdict(int) #word to freq map
         for fname in self.doc_list:
-            target_words = (l.split()[0] for l in open(fname).xreadlines()) #just take the first word of every sentence
+            target_words = (l.split()[0] for l in open(fname).readlines()) #just take the first word of every sentence
             for w in target_words:
                 word_to_freq_map[w] += 1
 
-        word_to_id_map = {w:i for i,w in enumerate(word_to_freq_map.iterkeys())}
-        id_to_word_map = {v:k for k,v in word_to_id_map.iteritems()}
+        word_to_id_map = {w:i for i,w in enumerate(word_to_freq_map.keys())}
+        id_to_word_map = {v:k for k,v in word_to_id_map.items()}
 
         word_to_id_map["UNK"] = len(word_to_id_map)
         id_to_word_map[len(word_to_id_map)-1] = "UNK"
@@ -52,7 +52,7 @@ class Corpus(object):
         self.low_freq_word_ids = low_freq_words_ids
 
         word_id_freq_map_as_list = [] #id of this list is the word id and value is the freq of word with corresponding word id
-        for i in xrange(len(self._word_to_freq_map)):
+        for i in range(len(self._word_to_freq_map)):
             word_id_freq_map_as_list.append(self._word_to_freq_map[self._id_to_word_map[i]])
         self.word_id_freq_map_as_list = word_id_freq_map_as_list
 
@@ -136,7 +136,8 @@ class Corpus(object):
         contextword_ids = np.array(contextword_ids, dtype=np.int32)
 
         contextword_outputs = np.reshape(contextword_ids, [len(contextword_ids), 1])
-
+        print("targetword_ids", targetword_ids)
+        print("contextword_outputs", contextword_outputs)
         return targetword_ids,contextword_outputs
 
 

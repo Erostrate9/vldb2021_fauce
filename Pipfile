@@ -11,6 +11,8 @@ tensorflow = "*"
 joblib = "*"
 scikit-learn = "*"
 pandas = "*"
+psutil = "*"
+nltk = "*"
 
 [dev-packages]
 

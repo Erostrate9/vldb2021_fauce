@@ -58,9 +58,9 @@ def linear_kernel_svm_classify (X_train, X_test, Y_train, Y_test):
     Y_pred = classifier.predict(test_kernel.toarray())
 
     acc = accuracy_score(Y_test, Y_pred)
-    print 'SVM with Weisfiler-Lehman kernel, accuracy: {}'.format(acc)
+    print('SVM with Weisfiler-Lehman kernel, accuracy: {}'.format(acc))
 
-    print classification_report(Y_test, Y_pred)
+    print(classification_report(Y_test, Y_pred))
 
 def deep_kernel_svm_classify (X_train, X_test, Y_train, Y_test, subgraph_kernel):
     '''
@@ -80,9 +80,9 @@ def deep_kernel_svm_classify (X_train, X_test, Y_train, Y_test, subgraph_kernel)
     Y_pred = classifier.predict(test_kernel.toarray())
 
     acc = accuracy_score(Y_test, Y_pred)
-    print 'SVM with deep Weisfiler-Lehman kernel, accuracy: {}'.format(acc)
+    print('SVM with deep Weisfiler-Lehman kernel, accuracy: {}'.format(acc))
 
-    print classification_report(Y_test, Y_pred)
+    print(classification_report(Y_test, Y_pred))
 
 
 def perform_classification (corpus_dir, extn, embedding_fname, class_labels_fname):

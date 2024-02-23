@@ -20,20 +20,28 @@ def read_from_json_gexf(fname=None,label_field_name='APIs',conv_undir = False):
         logging.error('no valid path or file name')
         return None
     else:
+        g = nx.Graph()
         try:
             try:
-                with open(fname, 'rb') as File:
-                    org_dep_g = json_graph.node_link_graph(json.load(File))
+                with open(fname, 'rb') as f:
+                    js_graph = json.load(f)
+                    org_dep_g = json_graph.node_link_graph(js_graph)
             except:
-                org_dep_g = nx.read_gexf (path=fname)
+                print("using read_gexf to load the graph")
+                org_dep_g = nx.read_gexf(path=fname, version="1.1draft")
 
-            g = nx.DiGraph()
-            for n, d in org_dep_g.nodes_iter(data=True):
-                g.add_node(n, attr_dict={'label': '-'.join(d[label_field_name].split('\n'))})
-            g.add_edges_from(org_dep_g.edges_iter())
+            print("adding nodes!")
+            for n, d in org_dep_g.nodes(data=True):
+                print("ADDSAD", n);
+                g.add_node(n, **{'label': '-'.join(d[label_field_name].split('\n'))})
+            print("adding edges!")
+            g.add_edges_from(org_dep_g.edges())
+            
         except:
+            print("yo!!!")
             logging.error("unable to load graph from file: {}".format(fname))
             # return 0
+    print("1yo!!!")
     logging.debug('loaded {} a graph with {} nodes and {} egdes'.format(fname, g.number_of_nodes(),g.number_of_edges()))
     if conv_undir:
         g = nx.Graph (g)
@@ -48,17 +56,17 @@ def get_graph_as_bow (g, h):
     :param h: WL kernel height
     :return: sentence of the format <target> <context1> <context2> ...
     '''
-    for n,d in g.nodes_iter(data=True):
-        for i in xrange(0, h+1):
+    for n,d in g.nodes(data=True):
+        for i in range(0, h+1):
             center = d['relabel'][i]
             neis_labels_prev_deg = []
             neis_labels_next_deg = []
 
             if -1 != i-1:
-                neis_labels_prev_deg = [g.node[nei]['relabel'][i-1] for nei in nx.all_neighbors(g, n)] + [d['relabel'][i-1]]
-            NeisLabelsSameDeg = [g.node[nei]['relabel'][i] for nei in nx.all_neighbors(g,n)]
+                neis_labels_prev_deg = [g.nodes[nei]['relabel'][i-1] for nei in nx.all_neighbors(g, n)] + [d['relabel'][i-1]]
+            NeisLabelsSameDeg = [g.nodes[nei]['relabel'][i] for nei in nx.all_neighbors(g,n)]
             if not i+1 > h:
-                neis_labels_next_deg = [g.node[nei]['relabel'][i+1] for nei in nx.all_neighbors(g,n)] + [d['relabel'][i+1]]
+                neis_labels_next_deg = [g.nodes[nei]['relabel'][i+1] for nei in nx.all_neighbors(g,n)] + [d['relabel'][i+1]]
 
 
             nei_list = NeisLabelsSameDeg + neis_labels_prev_deg + neis_labels_next_deg
@@ -84,22 +92,24 @@ def wlk_relabel(g,h):
     :param h: height of WL kernel
     :return: relabeled graph
     '''
-    for n in g.nodes_iter():
-        g.node[n]['relabel'] = {}
+    for n, d in g.nodes(data=True):
+        d['relabel'] = {}
+    
+    print(g.nodes(data=True))
 
-    for i in xrange(0,h+1): #xrange returns [min,max)
-        for n in g.nodes_iter():
+    for i in range(0,h+1): #xrange returns [min,max)
+        for n, d in g.nodes(data=True):
             # degree_prefix = 'D' + str(i)
             degree_prefix = ''
             if 0 == i:
-                g.node[n]['relabel'][0] = degree_prefix + str(g.node[n]['label']).strip() + degree_prefix
+                d['relabel'][0] = degree_prefix + str(d['label']).strip() + degree_prefix
             else:
-                nei_labels = [g.node[nei]['relabel'][i-1] for nei in nx.all_neighbors(g,n)]
+                nei_labels = [g.nodes[nei]['relabel'][i-1] for nei in g.neighbors(n)]
                 nei_labels.sort()
                 sorted_nei_labels = (','*i).join(nei_labels)
 
-                current_in_relabel = g.node[n]['relabel'][i-1] +'#'*i+ sorted_nei_labels
-                g.node[n]['relabel'][i] = degree_prefix + current_in_relabel.strip() + degree_prefix
+                current_in_relabel = d['relabel'][i-1] +'#'*i+ sorted_nei_labels
+                d['relabel'][i] = degree_prefix + current_in_relabel.strip() + degree_prefix
 
     return g #relabled graph
 
@@ -137,7 +147,7 @@ def dump_subgraph2vec_sentences (f, h, label_filed_name):
     subgraph2vec_sentences = get_graph_as_bow(g, h)
     with open(opfname, 'w') as fh:
         for w in subgraph2vec_sentences:
-            print >> fh, w
+            print(w, file=fh)
 
     logging.debug('dumped wlk file in {} sec'.format(round(time()-T0,2)))
 
@@ -154,7 +164,7 @@ if __name__ == '__main__':
     extn = '.gexf'
 
     files_to_process = get_files(dirname = graph_dir, extn = extn)
-    print files_to_process
+    print(files_to_process)
     raw_input('have to procees a total of {} files with {} parallel processes... hit any key to proceed...'.
               format(len(files_to_process), n_cpus))
 

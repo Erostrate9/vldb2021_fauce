@@ -50,7 +50,7 @@ def main(args):
     embedding_fname = train_skipgram(corpus_dir, wl_extn, learning_rate, embedding_size, num_negsample, epochs, batch_size, output_dir,valid_size)
     logging.info('Trained the skipgram model in {} sec.'.format(round(time.time()-t0, 2)))
 
-    perform_classification (corpus_dir, wl_extn, embedding_fname, class_labels_fname)
+    # perform_classification (corpus_dir, wl_extn, embedding_fname, class_labels_fname)
 
 
 
@@ -61,13 +61,13 @@ def parse_args():
     :return: all command line arguments read
     '''
     args = argparse.ArgumentParser("subgraph2vec")
-    args.add_argument("-c","--corpus", default = "../example_data/datasets/node_edges",
+    args.add_argument("-c","--corpus", default = "./example_data/datasets/imdb_join_schema",
                       help="Path to directory containing graph files to be used for graph classification or clustering")
 
-    args.add_argument('-l','--class_labels_file_name', default='../example_data/datasets/node.Labels',
+    args.add_argument('-l','--class_labels_file_name', default='./example_data/datasets/node.Labels',
                       help='File name containg the name of the sample and the class labels')
 
-    args.add_argument('-o', "--output_dir", default = "../embeddings",
+    args.add_argument('-o', "--output_dir", default = "./embeddings",
                       help="Path to directory for storing output embeddings")
 
     args.add_argument('-b',"--batch_size", default=4, type=int,

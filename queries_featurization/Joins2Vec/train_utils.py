@@ -2,7 +2,7 @@ import os,logging
 import numpy as np
 from data_utils import Corpus
 from utils import save_embeddings
-from skipgram import skipgram
+from skipgram import Skipgram
 
 
 def train_skipgram (corpus_dir, extn, learning_rate, embedding_size, num_negsample, epochs, batch_size, output_dir,valid_size):
@@ -35,7 +35,7 @@ def train_skipgram (corpus_dir, extn, learning_rate, embedding_size, num_negsamp
     valid_examples = np.concatenate((np.random.choice(corpus.high_freq_word_ids, valid_size, replace=False),
                                      np.random.choice(corpus.low_freq_word_ids, valid_size, replace=False)))
 
-    model_skipgram = skipgram(
+    model_skipgram = Skipgram(
         doc_size=corpus._vocabsize,  # for doc2vec skipgram model, the doc size should be same as word size
         vocabulary_size=corpus._vocabsize,  # size of i/p and o/p layers
         learning_rate=learning_rate,  # will decay over time?
