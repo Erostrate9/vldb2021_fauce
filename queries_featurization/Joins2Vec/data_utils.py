@@ -129,15 +129,14 @@ class Corpus(object):
                 doc = open(doc_name).readlines()
 
         target_context_pairs = zip(targetword_ids, contextword_ids)
-        shuffle(target_context_pairs)
-        targetword_ids, contextword_ids = zip(*target_context_pairs)
+        target_context_pairs_list = list(target_context_pairs)
+        shuffle(target_context_pairs_list)
+        targetword_ids, contextword_ids = zip(*target_context_pairs_list)
 
         targetword_ids = np.array(targetword_ids, dtype=np.int32)
         contextword_ids = np.array(contextword_ids, dtype=np.int32)
 
         contextword_outputs = np.reshape(contextword_ids, [len(contextword_ids), 1])
-        print("targetword_ids", targetword_ids)
-        print("contextword_outputs", contextword_outputs)
         return targetword_ids,contextword_outputs
 
 

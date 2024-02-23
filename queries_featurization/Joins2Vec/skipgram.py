@@ -10,15 +10,15 @@ class Skipgram(object):
     def trainer_initial(self):
         graph = tf.Graph()
         with graph.as_default():
-            batch_inputs = tf.keras.Input(tf.int32, shape=(None,))
-            batch_labels = tf.keras.Input(tf.int64, shape=(None, 1))
+            batch_inputs = tf.keras.Input(dtype=tf.int32, shape=())
+            batch_labels = tf.keras.Input(dtype=tf.int64, shape=(1,))
             val_dataset = tf.constant(self.valid_data, dtype=tf.int32)
 
             doc_embeddings = tf.Variable(
-                        tf.random_uniform([self.doc_size, self.embedding_size], -0.5 / self.embedding_size, 0.5/self.embedding_size))
+                        tf.random.uniform([self.doc_size, self.embedding_size], -0.5 / self.embedding_size, 0.5/self.embedding_size))
 
             batch_doc_embeddings = tf.nn.embedding_lookup(doc_embeddings, batch_inputs)
-
+            
             weights = tf.Variable(tf.random.truncated_normal([self.vocabulary_size, self.embedding_size],
                                                               stddev=1.0 / math.sqrt(self.embedding_size)))
             biases = tf.Variable(tf.zeros(self.vocabulary_size))
@@ -42,10 +42,15 @@ class Skipgram(object):
                                ))
 
             global_step = tf.Variable(0, trainable=False)
-            learning_rate = tf.train.exponential_decay(self.learning_rate,
-                                                       global_step, 100000, 0.96, staircase=True)  # Linear decay over time
+            learning_rate_schedule = tf.keras.optimizers.schedules.ExponentialDecay(
+                initial_learning_rate=self.learning_rate,  # initial learning rate
+                decay_steps=100000,  # decay steps
+                decay_rate=0.96,  # decay rate
+                staircase=True  # whether to apply decay in a staircase fashion
+            )
+            learning_rate = learning_rate_schedule(global_step)
             learning_rate = tf.maximum(learning_rate, 0.001)  # Cannot go below 0.001 to ensure at least a minimal learning
-            optimizer = tf.train.GradientDescentOptimizer(learning_rate).minimize(loss, global_step=global_step)
+            optimizer = tf.compat.v1.train.GradientDescentOptimizer(learning_rate).minimize(loss, global_step=global_step)
 
             norm = tf.sqrt(tf.reduce_mean(tf.square(doc_embeddings), axis=1, keepdims=True))
             normalized_embeddings = doc_embeddings / norm
@@ -70,9 +75,9 @@ class Skipgram(object):
         self.loss,self.optimizer,self.normalized_weights,self.similarity = self.trainer_initial()
 
     def train(self, corpus, batch_size, valid_dataset):
-        with tf.Session(graph=self.graph,
-                        config=tf.ConfigProto(log_device_placement=True, allow_soft_placement=False)) as sess:
-            init = tf.global_variables_initializer()
+        with tf.compat.v1.Session(graph=self.graph,
+                        config=tf.compat.v1.ConfigProto(log_device_placement=True, allow_soft_placement=False)) as sess:
+            init = tf.compat.v1.global_variables_initializer()
             sess.run(init)
 
             loss = 0

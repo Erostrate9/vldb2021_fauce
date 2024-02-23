@@ -20,10 +20,10 @@ def save_embeddings(corpus, final_embeddings, embedding_size, opfname):
     lines_to_write = []
     lines_to_write.append(str(corpus._vocabsize) + ' ' + str(embedding_size))
     lines_to_write.extend([corpus._id_to_word_map[i] + ' ' +
-                           ' '.join(final_embeddings[i].astype('str').tolist()) for i in xrange(corpus._vocabsize)])
+                           ' '.join(final_embeddings[i].astype('str').tolist()) for i in range(corpus._vocabsize)])
     with open(opfname, 'w') as fh:
         for l in lines_to_write:
-            print >>fh, l
+            print(l, file=fh)
 
 
 def get_class_labels(graph_files, class_labels_fname):
