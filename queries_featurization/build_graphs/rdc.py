@@ -5,7 +5,29 @@ import numpy as np
 from scipy.stats import rankdata
 import csv
 import pandas
-df=pandas.read_csv('full_data_12_19_new_CHKK_cluster3.csv')
+from sklearn.preprocessing import OrdinalEncoder
+
+ordinal_encoder = OrdinalEncoder()
+df=pandas.read_csv('/Users/dverma/uottawa/project/imdb/cast_info.csv', on_bad_lines='skip', low_memory=False)
+df.columns = ['id', 'person_id', 'movie_id', 'person_role_id', 'note', 'nr_order',
+       'role_id']
+# df['title'].fillna('', inplace=True)
+# df['imdb_index'].fillna('', inplace=True)
+# df['phonetic_code'].fillna('', inplace=True)
+# df['series_years'].fillna('', inplace=True)
+# cols = ['title', 'imdb_index', 'phonetic_code', 'series_years', 'md5sum']
+# df[cols] = ordinal_encoder.fit_transform(df[cols])
+# df['imdb_id'].fillna(-1, inplace=True)
+# df['production_year'].fillna(-1, inplace=True)
+# df['episode_of_id'].fillna(-1, inplace=True)
+# df['season_nr'].fillna(-1, inplace=True)
+# df['episode_nr'].fillna(-1, inplace=True)
+
+df = df.drop(axis=1, labels=["note"])
+median = df['nr_order'].median()
+df['nr_order'].fillna(median, inplace=True)
+df['person_role_id'].fillna(-1, inplace=True)
+
 array=df.values
 def rdc(x, y, f=np.sin, k=20, s=1/6., n=1):
     """
@@ -22,16 +44,20 @@ def rdc(x, y, f=np.sin, k=20, s=1/6., n=1):
     According to the paper, the coefficient should be relatively insensitive to
     the settings of the f, k, and s parameters.
     """
+    print("*** x, y ****", x[0], y[0])
     if n > 1:
         values = []
         for i in range(n):
             try:
                 values.append(rdc(x, y, f, k, s, 1))
-            except np.linalg.linalg.LinAlgError: pass
+            except np.linalg.linalg.LinAlgError:
+                pass
         return np.median(values)
 
-    if len(x.shape) == 1: x = x.reshape((-1, 1))
-    if len(y.shape) == 1: y = y.reshape((-1, 1))
+    if len(x.shape) == 1:
+        x = x.reshape((-1, 1))
+    if len(y.shape) == 1:
+        y = y.reshape((-1, 1))
 
     # Copula Transformation
     cx = np.column_stack([rankdata(xc, method='ordinal') for xc in x.T])/float(x.size)
@@ -71,7 +97,7 @@ def rdc(x, y, f=np.sin, k=20, s=1/6., n=1):
         Cyx = C[k0:k0+k, :k]
 
         eigs = np.linalg.eigvals(np.dot(np.dot(np.linalg.pinv(Cxx), Cxy),
-                                        np.dot(np.linalg.pinv(Cyy), Cyx)))
+                                         np.dot(np.linalg.pinv(Cyy), Cyx)))
 
         # Binary search if k is too large
         if not (np.all(np.isreal(eigs)) and
@@ -80,7 +106,8 @@ def rdc(x, y, f=np.sin, k=20, s=1/6., n=1):
             ub -= 1
             k = (ub + lb) // 2
             continue
-        if lb == ub: break
+        if lb == ub:
+            break
         lb = k
         if ub == lb + 1:
             k = ub
@@ -93,4 +120,4 @@ for i in range(len(array[0])):
     for j in range(len(array[0])):
         matrix[i][j]=rdc(array[:,i], array[:,j])
 my_df=pandas.DataFrame(matrix)
-my_df.to_csv('matrix_12_19_CHKK_cluster1.csv', index=False, header=False)
+my_df.to_csv('/Users/dverma/uottawa/project/imdb/rdc_cast_info.csv', index=False, header=False)
