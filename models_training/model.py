@@ -1,18 +1,21 @@
-import tensorflow as tf
+# import tensorflow as tf
 #tf.disable_v2_behavior()
 #import tensorflow.compat.v1 as tf tf.disable_v2_behavior()
 
-#import tensorflow.compat.v1 as tf
+import tensorflow.compat.v1 as tf
 import numpy as np
 
-#tf.disable_v2_behavior()
+tf.disable_v2_behavior()
 
 class MLPGaussianRegressor():
 
     def __init__(self, args, sizes, model_scope):
 
-        self.input_data = tf.placeholder(tf.float32, [None, sizes[0]])
-        self.target_data = tf.placeholder(tf.float32, [None, 1])
+        self.input_data = tf.placeholder(shape=[None, sizes[0]], dtype=tf.float32)
+        self.target_data = tf.placeholder(shape=[None, 1], dtype=tf.float32)
+
+        # self.input_data = tf.placeholder(tf.float32, [None, sizes[0]])
+        # self.target_data = tf.placeholder(tf.float32, [None, 1])
 
         with tf.variable_scope(model_scope+'learning_rate'):
             self.lr = tf.Variable(args.learning_rate, trainable=False, name='learning_rate')

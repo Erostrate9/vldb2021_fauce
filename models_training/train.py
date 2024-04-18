@@ -1,7 +1,7 @@
 import numpy as np
 import argparse
-import tensorflow as tf
-#import tensorflow.compat.v1 as tf
+# import tensorflow as tf
+import tensorflow.compat.v1 as tf
 import os
 import math
 #import matplotlib.pyplot as plt
@@ -17,7 +17,7 @@ from utils import DataLoader_RegressionToy_sinusoidal
 from utils import DataLoader_RegressionToy_sinusoidal_break
 from utils import DataLoader_RegressionToy_break
 
-#tf.disable_v2_behavior()
+tf.disable_v2_behavior()
 os.environ['CUDA_VISIBLE_DEVICES'] = '1,2'
 
 def main():
@@ -61,6 +61,9 @@ def main():
                         help='The number of data to be tested')
     # Beta for avoiding the NaN for the loss
     parser.add_argument('--beta', type=float, default=1e-3,
+                        help='This small number added into the loss for avoiding Nan')
+    # Beta for avoiding the NaN for the loss
+    parser.add_argument('--output', type=str, default="results/Joins_5_13_filters_error_log2_itr20k_train100k_2.csv",
                         help='This small number added into the loss for avoiding Nan')
     args = parser.parse_args()
     train_ensemble(args)
@@ -151,10 +154,10 @@ def train_ensemble(args):
                     sess.run(tf.assign(model.lr, args.learning_rate * (args.decay_rate ** (itr/300))))
                     print('itr: {}, nll: {}'.format(itr, nll))
 
-        test_ensemble(ensemble, sess, dataLoader)
+        test_ensemble(args, ensemble, sess, dataLoader)
 
 
-def test_ensemble(ensemble, sess, dataLoader):
+def test_ensemble(args, ensemble, sess, dataLoader):
     test_xs, test_ys = dataLoader.get_test_data()
     min_val, max_val = dataLoader.get_min_max()
     print('min_val is : {}'.format(min_val))
@@ -195,7 +198,7 @@ def test_ensemble(ensemble, sess, dataLoader):
     final_test_error_cols_num = final_test_error_write.shape[1]
     final_test_error_cols_name = ['error{}'.format(i) for i in range(final_test_error_cols_num)]
     final_test_error_dataToCSV = DataFrame(final_test_error_write, columns = final_test_error_cols_name)
-    final_test_error_dataToCSV.to_csv('/home/bo/deep-ensembles-uncertainty/results/version2_five_joins_400000_9_16_filters_error_log15_itr20k_train400k_ens10_128_256_512_512_lre-4_xavier.csv', escapechar=None)
+    final_test_error_dataToCSV.to_csv(args.output, escapechar=None)
     print('Final testing error write is done!')
     
     #plt.plot(test_xs_scaled, test_ys, 'b-')

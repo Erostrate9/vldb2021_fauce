@@ -7,11 +7,12 @@ class DataLoader_RegressionToy():
 
     def __init__(self, args):
 
-        assert args.dataset in ['five_joins_012345_5_12_filters_error_log10']
+        # assert args.dataset in ['five_joins_012345_5_12_filters_error_log10']
 
         if args.dataset == 'five_joins_012345_5_12_filters_error_log10':
             self.data = pd.read_csv('/home/bo/deep-ensembles-uncertainty/datasets/JOB_five_joins_training_dataset_400000_9_16filers_log15.csv')
-
+        else:
+          self.data = pd.read_csv(args.dataset)
         self.column_names = self.data.columns
         self.num_rows = (int)(len(self.data)/1)
         print(self.num_rows)
