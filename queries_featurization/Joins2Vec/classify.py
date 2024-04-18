@@ -97,7 +97,7 @@ def perform_classification (corpus_dir, extn, embedding_fname, class_labels_fnam
     gensim_model = gensim.models.KeyedVectors.load_word2vec_format(fname=embedding_fname)
     logging.info('Loaded gensim model of subgraph vectors')
 
-    subgraph_vocab = sorted(gensim_model.vocab.keys())
+    subgraph_vocab = sorted(gensim_model.key_to_index.keys())
     logging.info('Vocab consists of {} subgraph features'.format(len(subgraph_vocab)))
 
     wlk_files = get_files(corpus_dir, extn)
