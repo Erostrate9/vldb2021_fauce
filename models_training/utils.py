@@ -87,10 +87,12 @@ class DataLoader_RegressionToy():
 
     def get_test_data(self):
 
-        test_indices = [i for i in range(self.num_test_data)]
+        num_test_data = len(self.test_data_x) if self.num_test_data > len(self.test_data_x) else self.num_test_data
 
-        test_x = np.zeros([self.num_test_data, self.train_data_x.shape[1]])
-        test_y = np.zeros([self.num_test_data, 1])
+        test_indices = [i for i in range()]
+
+        test_x = np.zeros([num_test_data, self.train_data_x.shape[1]])
+        test_y = np.zeros([num_test_data, 1])
 
         for i in range(len(test_indices)):
             test_x[i, :] = self.test_data_x[test_indices[i], :]
