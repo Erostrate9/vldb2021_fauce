@@ -178,7 +178,7 @@ def test_ensemble(args, ensemble, sess, dataLoader):
     
     final_error = []
 
-    for i in range(2000):
+    for i in range(np.min(len(estimate_mean1), len(test_ys2))):
         temp_estimate_val = estimate_mean2[i]
         temp_real_val = test_ys2[i]
 
