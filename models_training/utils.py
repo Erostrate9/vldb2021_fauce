@@ -89,7 +89,7 @@ class DataLoader_RegressionToy():
 
         num_test_data = len(self.test_data_x) if self.num_test_data > len(self.test_data_x) else self.num_test_data
 
-        test_indices = [i for i in range()]
+        test_indices = [i for i in range(num_test_data)]
 
         test_x = np.zeros([num_test_data, self.train_data_x.shape[1]])
         test_y = np.zeros([num_test_data, 1])
