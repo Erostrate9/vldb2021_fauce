@@ -1,0 +1,142 @@
+Title:
+* Id 1
+* Title 2
+* imdb_index 3
+* kind_id 4
+* production_year 5
+* imdb_id 6
+* phonetic_code 7
+* episode_of_id 8
+* season_nr 9
+* episode_nr 10
+* series_years 11
+* Md5sum 12
+
+cast_info
+* Id 13
+* person_id 14
+* movie_id 1
+* person_role_id 15
+* nr_order 16
+* role_id 17
+
+movie_info
+* Id 18
+* movie_id 1
+* info_type_id 19
+
+movie_companies
+* Id 20
+* movie_id 1
+* company_id 21
+* company_type_id 22
+
+movie_keyword
+* Id 23
+* movie_id 1
+* movie_keyword_id 24
+
+movie_info_idx
+* id 25
+* movie_id 1
+* info_type_id 26
+* Info 27
+
+comp_cast_type * id 28 * kind 29
+
+complete_cast
+* Id 30
+* subject_id 28
+* status_id 28
+* movie_id 1
+
+company_type
+* Id 22
+* Kind 31
+
+info_type
+* Id 32
+* Info 33
+
+Keyword
+* Id 24
+* Keyword 34
+* phonetic_code 35
+
+Kind type
+* id 2
+* Kind 36
+
+Link type
+* Id 40
+* Link 41
+
+Movie link
+* Id 42
+* movie_id 1
+* linked_movie_id 1
+* link_type_id 40
+
+Name
+* Id 14
+* Name 41
+* imdb_index 42
+* imdb_id 43
+* Gender 44
+* name_pcode_cf 45
+* name_pcode_nf 46
+* surname_pcode 47
+* Md5num 48
+
+Role type
+* Id 17
+* role 49
+
+Person info
+* Id 50
+* person_id 14
+* info_type_id 32
+* Info 51
+
+aka_name
+* Id 14
+* person_id 52
+* name 53
+* imdb_index 54
+* name_pcode_cf 55
+*  name_pcode_nf 56
+* surname_pcode 57
+* md5sum 58
+
+
+Char_name
+* Id 15
+* Name 59
+* imdb_index 60
+* imdb_id 61
+* name_pcode_nf 62
+* surname_pcode 63
+* Md5sum 64
+
+aka_title
+
+* Id 65
+* movie_id 1
+* title 66
+* imdb_index 67
+* kind_id 68
+* production_year 69
+* phonetic_code 70
+* episode_of_id 71
+* season_nr 72
+* Note 73
+* Md5sum 74
+
+company_name
+* Id 21
+* Name 75
+* country_code 76
+* imdb_id 77
+* name_pcode_nf 78
+* name_pcode_sf 79
+* Md5sum 80
