@@ -8,9 +8,13 @@ import pandas
 from sklearn.preprocessing import OrdinalEncoder
 
 ordinal_encoder = OrdinalEncoder()
-df=pandas.read_csv('/Users/dverma/uottawa/project/imdb/cast_info.csv', on_bad_lines='skip', low_memory=False)
-df.columns = ['id', 'person_id', 'movie_id', 'person_role_id', 'note', 'nr_order',
-       'role_id']
+# df=pandas.read_csv('/Users/dverma/uottawa/project/job/person_info.csv', on_bad_lines='skip', low_memory=False)
+df=pandas.read_csv('/Users/dverma/uottawa/project/job/person_info.csv', on_bad_lines='skip', low_memory=False, quoting=3, escapechar='\\')
+# df.fillna({'imdb_id': -1}, inplace=True)
+df.fillna('', inplace=True)
+# df.fillna({'phonetic_code': ''}, inplace=True)
+# df.sort_values(by=['kind'], inplace=True)
+# df.fillna({"kind_id": -1, "production_year": 0, "phonetic_code": '', "episode_of_id": -1, "season_nr": -1, "episode_nr": -1}, inplace=True)
 # df['title'].fillna('', inplace=True)
 # df['imdb_index'].fillna('', inplace=True)
 # df['phonetic_code'].fillna('', inplace=True)
@@ -22,11 +26,41 @@ df.columns = ['id', 'person_id', 'movie_id', 'person_role_id', 'note', 'nr_order
 # df['episode_of_id'].fillna(-1, inplace=True)
 # df['season_nr'].fillna(-1, inplace=True)
 # df['episode_nr'].fillna(-1, inplace=True)
-
 df = df.drop(axis=1, labels=["note"])
-median = df['nr_order'].median()
-df['nr_order'].fillna(median, inplace=True)
-df['person_role_id'].fillna(-1, inplace=True)
+# cols = ['title']
+# cols = ['link']
+# df[cols] = ordinal_encoder.fit_transform(df[cols])
+# df.sort_values(by=['title'], inplace=True)
+# cols = ['title']
+# df[cols] = ordinal_encoder.fit_transform(df[cols])
+df.sort_values(by=['info'], inplace=True)
+cols = ['info']
+# df[cols] = ordinal_encoder.fit_transform(df[cols])
+# df.sort_values(by=['phonetic_code'], inplace=True)
+# cols = ['phonetic_code']
+# df[cols] = ordinal_encoder.fit_transform(df[cols])
+# cols = ['imdb_index']
+# df.sort_values(by=['imdb_index'], inplace=True)
+# df[cols] = ordinal_encoder.fit_transform(df[cols])
+# cols = ['name_pcode_cf']
+# df.sort_values(by=['name_pcode_cf'], inplace=True)
+# df[cols] = ordinal_encoder.fit_transform(df[cols])
+# df.sort_values(by=['name_pcode_nf'], inplace=True)
+# cols = ['name_pcode_nf']
+# df[cols] = ordinal_encoder.fit_transform(df[cols])
+# df.sort_values(by=['surname_pcode'], inplace=True)
+# cols = ['surname_pcode']
+# df[cols] = ordinal_encoder.fit_transform(df[cols])
+# df.sort_values(by=['md5sum'], inplace=True)
+# cols = ['md5sum']
+# df[cols] = ordinal_encoder.fit_transform(df[cols])
+# df.sort_values(by=['gender'], inplace=True)
+# cols = ['gender']
+# df[cols] = ordinal_encoder.fit_transform(df[cols])
+
+# median = df['nr_order'].median()
+# df['nr_order'].fillna(median, inplace=True)
+# df['person_role_id'].fillna(-1, inplace=True)
 
 array=df.values
 def rdc(x, y, f=np.sin, k=20, s=1/6., n=1):
@@ -120,4 +154,4 @@ for i in range(len(array[0])):
     for j in range(len(array[0])):
         matrix[i][j]=rdc(array[:,i], array[:,j])
 my_df=pandas.DataFrame(matrix)
-my_df.to_csv('/Users/dverma/uottawa/project/imdb/rdc_cast_info.csv', index=False, header=False)
+my_df.to_csv('/Users/dverma/uottawa/project/job/rdc_person_info.csv', index=False, header=False)
