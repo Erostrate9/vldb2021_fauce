@@ -1,0 +1,13 @@
+name: ge
+channels:
+  - conda-forge
+  - defaults
+  - prometeia
+  - legel
+dependencies:
+  - python=2.7
+  - numpy==1.11.2
+  - decorator=4.4.1
+  - networkx
+  - gensim
+  - pip
