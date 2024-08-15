@@ -87,7 +87,9 @@ class Corpus(object):
     def generate_batch_from_file(self, batch_size):
         targetword_ids = []
         contextword_ids = []
-
+        print("self.doc_list: ", self.doc_list)
+        print("self.doc_shuffle: ", self.doc_shuffle)
+        print("self.graph_index: ", self.graph_index)
         doc_name = self.doc_list[self.doc_shuffle[self.graph_index]]
         doc = open(doc_name).readlines()
         while self.subgraph_index >= len(doc):

@@ -13,4 +13,7 @@ dependencies:
   - gensim
   - joblib
   - tensorflow==0.12.1
+  - scikit-learn
+  - psutil
+  - nltk
   - pip

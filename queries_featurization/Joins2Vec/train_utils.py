@@ -32,8 +32,8 @@ def train_skipgram (corpus_dir, extn, learning_rate, embedding_size, num_negsamp
     logging.info("Initializing SKIPGRAM...")
     corpus = Corpus(corpus_dir, extn = extn, max_files=0)  # just load 'max_files' files from this folder
     corpus.scan_and_load_corpus()
-    valid_examples = np.concatenate((np.random.choice(corpus.high_freq_word_ids, valid_size, replace=False),
-                                     np.random.choice(corpus.low_freq_word_ids, valid_size, replace=False)))
+    valid_examples = np.concatenate((np.random.choice(corpus.high_freq_word_ids, valid_size, replace=True),
+                                     np.random.choice(corpus.low_freq_word_ids, valid_size, replace=True)))
 
     model_skipgram = skipgram(
         doc_size=corpus._vocabsize,  # for doc2vec skipgram model, the doc size should be same as word size

@@ -94,7 +94,7 @@ def perform_classification (corpus_dir, extn, embedding_fname, class_labels_fnam
     :param class_labels_fname: files containing labels of each graph
     :return: None
     '''
-    gensim_model = gensim.models.KeyedVectors.load_word2vec_format(fname=embedding_fname)
+    gensim_model = gensim.models.Word2Vec.load_word2vec_format(fname=embedding_fname, binary=True)
     logging.info('Loaded gensim model of subgraph vectors')
 
     subgraph_vocab = sorted(gensim_model.vocab.keys())

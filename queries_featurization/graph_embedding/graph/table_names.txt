@@ -1,7 +1,7 @@
 title 0
 cast_info 1
 movie_info 2
-movie_company 3
+movie_companies 3
 movie_keyword 4
 movie_info_idx 5
 kind_type 6
