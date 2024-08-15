@@ -1,0 +1,16 @@
+name: qf
+channels:
+  - conda-forge
+  - defaults
+  - prometeia
+  - legel
+  - free
+dependencies:
+  - python=2.7
+  - numpy==1.11.2
+  - decorator=4.4.1
+  - networkx
+  - gensim
+  - joblib
+  - tensorflow==0.12.1
+  - pip
