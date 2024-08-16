@@ -8,7 +8,7 @@ from utils import get_files
 logger = logging.getLogger()
 logger.setLevel("INFO")
 
-def read_from_json_gexf(fname=None,label_field_name='APIs',conv_undir = False):
+def read_from_json_gexf(fname=None,label_field_name='APIs',conv_undir = True):
     '''
     Load the graph files (.gexf or .json only supported)
     :param fname: graph file name
@@ -124,7 +124,7 @@ def dump_subgraph2vec_sentences (f, h, label_filed_name):
 
     T0 = time()
     logging.debug('processing ',f)
-    g = read_from_json_gexf(f, label_filed_name)
+    g = read_from_json_gexf(f, label_filed_name, conv_undir = True)
     if not g:
         return
     g = wlk_relabel(g,h)
