@@ -1,0 +1,12 @@
+Metadata-Version: 2.1
+Name: rdc
+Version: 1.0
+Summary: Implements the Randomized Dependence Coefficient
+Home-page: https://github.com/garydoranjr/rdc.git
+Author: Gary Doran
+Author-email: garydoranjr@gmail.com
+License: BSD compatable (see the LICENSE file)
+Platform: unix
+Provides: rdc
+Requires-Dist: numpy
+Requires-Dist: scipy

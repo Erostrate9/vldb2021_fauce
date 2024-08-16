@@ -1,0 +1,8 @@
+README.md
+setup.py
+rdc/__init__.py
+rdc.egg-info/PKG-INFO
+rdc.egg-info/SOURCES.txt
+rdc.egg-info/dependency_links.txt
+rdc.egg-info/requires.txt
+rdc.egg-info/top_level.txt

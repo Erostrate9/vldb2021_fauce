@@ -1,12 +1,12 @@
 """
 http://papers.nips.cc/paper/5138-the-randomized-dependence-coefficient.pdf
 """
+import argparse
 import numpy as np
 from scipy.stats import rankdata
 import csv
 import pandas
-df=pandas.read_csv('full_data_12_19_new_CHKK_cluster3.csv')
-array=df.values
+
 def rdc(x, y, f=np.sin, k=20, s=1/6., n=1):
     """
     Computes the Randomized Dependence Coefficient
@@ -88,9 +88,36 @@ def rdc(x, y, f=np.sin, k=20, s=1/6., n=1):
             k = (ub + lb) // 2
 
     return np.sqrt(np.max(eigs))
-matrix=np.zeros((len(array[0]), len(array[0])))
-for i in range(len(array[0])):
-    for j in range(len(array[0])):
-        matrix[i][j]=rdc(array[:,i], array[:,j])
-my_df=pandas.DataFrame(matrix)
-my_df.to_csv('matrix_12_19_CHKK_cluster1.csv', index=False, header=False)
+
+def parse_args():
+    '''
+    Usual pythonic way of parsing command line arguments
+    :return: all command line arguments read
+    '''
+    args = argparse.ArgumentParser("rdc")
+    args.add_argument("-i","--input", default = 'full_data_12_19_new_CHKK_cluster1.csv',
+                      help="Input table data")
+    args.add_argument("-o","--output", default = 'matrix_12_19_CHKK_cluster1.csv',
+                      help="Ouput rdc matrix of given table")
+    # args.add_argument("-k","--random_projections", default = 20,
+    #                   help="number of random projections to use")
+    # args.add_argument("-s","--scale_parameter", default = 1/6.,
+    #                   help="scale parameter")
+    # args.add_argument("-n","--compute_times", default = 1,
+    #                   help="number of times to compute the RDC and return the median (for stability)")
+    return args.parse_args()
+
+def main(args):
+  df=pandas.read_csv(args.input, escapechar='\\')
+  array=df.values
+  matrix=np.zeros((len(array[0]), len(array[0])))
+  for i in range(len(array[0])):
+      for j in range(len(array[0])):
+          matrix[i][j]=rdc(array[:,i], array[:,j])
+  my_df=pandas.DataFrame(matrix)
+  my_df.to_csv(args.output, index=False, header=False)
+
+
+if __name__=="__main__":
+    args = parse_args()
+    main(args)
