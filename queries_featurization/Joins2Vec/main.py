@@ -70,7 +70,7 @@ def parse_args():
     args.add_argument('-o', "--output_dir", default = "../embeddings",
                       help="Path to directory for storing output embeddings")
 
-    args.add_argument('-b',"--batch_size", default=4, type=int,
+    args.add_argument('-b',"--batch_size", default=1, type=int,
                       help="Number of samples per training batch")
 
     args.add_argument('-e',"--epochs", default=3, type=int,
