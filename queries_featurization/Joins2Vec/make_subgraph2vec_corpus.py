@@ -34,16 +34,16 @@ def read_from_json_gexf(fname=None,label_field_name='APIs',conv_undir = True):
         except:
             logging.error("unable to load graph from file: {}".format(fname))
             # return 0
-    logging.debug('loaded {} a graph with {} nodes and {} egdes'.format(fname, g.number_of_nodes(),g.number_of_edges()))
+    logging.info('loaded {} a graph with {} nodes and {} egdes'.format(fname, g.number_of_nodes(),g.number_of_edges()))
     if conv_undir:
         g = nx.Graph (g)
-        logging.debug('converted {} as undirected graph'.format (g))
+        logging.info('converted {} as undirected graph'.format (g))
     return g
 
 
 def get_graph_as_bow (g, h):
     '''
-    Get subgraph2vec sentences from the goven graph
+    Get subgraph2vec sentences from the given graph
     :param g: networkx graph
     :param h: WL kernel height
     :return: sentence of the format <target> <context1> <context2> ...
@@ -62,15 +62,15 @@ def get_graph_as_bow (g, h):
 
 
             nei_list = NeisLabelsSameDeg + neis_labels_prev_deg + neis_labels_next_deg
-            try:
-                nei_list.append(d['relabel'][i-1]) #prev degree subgraph from the current node
-            except:
-                pass
-            try:
-                nei_list.append(d['relabel'][i+1]) #next degree subgraph from the current node
-            except:
-                pass
-
+            # try:
+            #     nei_list.append(d['relabel'][i-1]) #prev degree subgraph from the current node
+            # except:
+            #     pass
+            # try:
+            #     nei_list.append(d['relabel'][i+1]) #next degree subgraph from the current node
+            # except:
+            #     pass
+            nei_list = NeisLabelsSameDeg + neis_labels_prev_deg + neis_labels_next_deg
             nei_list = ' '.join (nei_list)
 
             sentence = center + ' ' + nei_list
@@ -143,19 +143,19 @@ def dump_subgraph2vec_sentences (f, h, label_filed_name):
 
 
 
-if __name__ == '__main__':
-    # if sys.argv[1] in ['-h','--help']:
-    #     print 'command line args: <gexf/json graph_dir> <height of WL kernel> <num of cpu cores for multi-processing>'
-    #     exit (0)
+# if __name__ == '__main__':
+#     # if sys.argv[1] in ['-h','--help']:
+#     #     print 'command line args: <gexf/json graph_dir> <height of WL kernel> <num of cpu cores for multi-processing>'
+#     #     exit (0)
 
-    graph_dir = "/home/annamalai/OLMD/OLMD/MKLDroid/tmp/amd_dataset_graphs_wlfiles/adgs"#folder containing the graph's gexf/json format files
-    h = 2 #height of WL kernel (i.e., degree of neighbourhood to consdider)
-    n_cpus = 36  # number of cpus to be used for multiprocessing
-    extn = '.gexf'
+#     graph_dir = "/home/annamalai/OLMD/OLMD/MKLDroid/tmp/amd_dataset_graphs_wlfiles/adgs"#folder containing the graph's gexf/json format files
+#     h = 2 #height of WL kernel (i.e., degree of neighbourhood to consdider)
+#     n_cpus = 36  # number of cpus to be used for multiprocessing
+#     extn = '.gexf'
 
-    files_to_process = get_files(dirname = graph_dir, extn = extn)
-    print files_to_process
-    raw_input('have to procees a total of {} files with {} parallel processes... hit any key to proceed...'.
-              format(len(files_to_process), n_cpus))
+#     files_to_process = get_files(dirname = graph_dir, extn = extn)
+#     print files_to_process
+#     raw_input('have to procees a total of {} files with {} parallel processes... hit any key to proceed...'.
+#               format(len(files_to_process), n_cpus))
 
-    Parallel(n_jobs=n_cpus)(delayed(dump_subgraph2vec_sentences)(f, h) for f in files_to_process)
+#     Parallel(n_jobs=n_cpus)(delayed(dump_subgraph2vec_sentences)(f, h) for f in files_to_process)
