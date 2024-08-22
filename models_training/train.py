@@ -132,6 +132,14 @@ def train_ensemble(args):
     sizes = [num_features, 128, 256, 512, 512, 2]
 
     ensemble = [MLPGaussianRegressor(args, sizes, 'model'+str(i)) for i in range(args.ensemble_size)]
+    
+    # Saver
+    output_filename = os.path.splitext(os.path.basename(args.dataset))[0]
+    model_dir = f'models/{output_filename}/'
+    if not os.path.exists(model_dir):
+        os.makedirs(model_dir)
+    saver = tf.train.Saver()
+    model_path = os.path.join(model_dir, 'model.ckpt')
 
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
@@ -148,11 +156,14 @@ def train_ensemble(args):
 
                 feed = {model.input_data: x, model.target_data: y}
                 _, nll, m, v = sess.run([model.train_op, model.nll, model.mean, model.var], feed)
-
                 if itr % 300 == 0:
                     sess.run(tf.assign(model.lr, args.learning_rate * (args.decay_rate ** (itr/300))))
                     print('itr: {}, nll: {}'.format(itr, nll))
-
+        saver.save(sess, model_path)
+        # load the model
+        saver.restore(sess, model_path)
+        print('Restored model from {}'.format(model_path))
+        # final test
         test_ensemble(ensemble, sess, dataLoader, args)
 
 
@@ -170,28 +181,65 @@ def test_ensemble(ensemble, sess, dataLoader, args):
     test_xs_scaled = dataLoader.input_mean + dataLoader.input_std*test_xs
 
     estimate_mean1 = [i * (max_val - min_val) + min_val for i in mean]
-    estimate_mean2 = [np.round(np.power(15, i)) for i in estimate_mean1]
-
+    # estimate_mean2 = [np.round(np.power(2, i)) for i in estimate_mean1]
+    ###
+    for i in estimate_mean1:
+      if i > np.log(np.finfo(np.float64).max)/np.log(2):
+          print(f"Warning: Large value before power operation: {i}")
+    estimate_mean2 = [np.round(np.power(2, i)) for i in estimate_mean1]
+    print(f"estimate_mean2: {estimate_mean2}")
+    ###
     test_ys1 = [i * (max_val - min_val) + min_val for i in test_ys]
-    test_ys2 = [np.round(np.power(15, i)) for i in test_ys1]
+    # test_ys2 = [np.round(np.power(2, i)) for i in test_ys1]
+    ###
+    for i in test_ys1:
+      if i > np.log(np.finfo(np.float64).max)/np.log(2):
+          print(f"Warning: Large value before power operation: {i}")
+    test_ys2 = [np.round(np.power(2, i)) for i in test_ys1]
+    print(f"test_ys2: {test_ys2}")
+    ###
     print('len(test_ys1):', len(test_ys1))
     print('len(test_ys2):', len(test_ys2))
     final_error = []
 
+    # for i in range(len(test_ys2)):
+    #     temp_estimate_val = estimate_mean2[i]
+    #     temp_real_val = test_ys2[i]
+
+    #     if temp_estimate_val == 0 and temp_real_val != 0:
+    #         error = temp_real_val
+    #     elif temp_estimate_val != 0 and temp_real_val == 0:
+    #         error = temp_estimate_val
+    #     elif temp_estimate_val == 0 and temp_real_val == 0:
+    #         error = 1
+    #     elif temp_estimate_val != 0 and temp_real_val != 0:
+    #         error = max(temp_estimate_val/temp_real_val, temp_real_val/temp_estimate_val)
+
+    #     final_error.append(error)
+    ###
     for i in range(len(test_ys2)):
-        temp_estimate_val = estimate_mean2[i]
-        temp_real_val = test_ys2[i]
-
-        if temp_estimate_val == 0 and temp_real_val != 0:
-            error = temp_real_val
-        elif temp_estimate_val != 0 and temp_real_val == 0:
-            error = temp_estimate_val
-        elif temp_estimate_val == 0 and temp_real_val == 0:
-            error = 1
-        elif temp_estimate_val != 0 and temp_real_val != 0:
-            error = max(temp_estimate_val/temp_real_val, temp_real_val/temp_estimate_val)
-
-        final_error.append(error)
+      temp_estimate_val = estimate_mean2[i]
+      temp_real_val = test_ys2[i]
+      
+      if temp_real_val == 0:
+          print(f"Warning: temp_real_val is zero at index {i}")
+      if temp_estimate_val == 0:
+          print(f"Warning: temp_estimate_val is zero at index {i}")
+      
+      if temp_estimate_val == 0 and temp_real_val != 0:
+          error = temp_real_val
+      elif temp_estimate_val != 0 and temp_real_val == 0:
+          error = temp_estimate_val
+      elif temp_estimate_val == 0 and temp_real_val == 0:
+          error = 1
+      elif temp_estimate_val != 0 and temp_real_val != 0:
+          try:
+              error = max(temp_estimate_val/temp_real_val, temp_real_val/temp_estimate_val)
+          except Exception as e:
+              print(f"Error in division at index {i}: {e}")
+              error = np.nan  # Assign NaN if an error occurs
+      final_error.append(error)
+      ###
 
 
     final_test_error_write = np.array(final_error)
