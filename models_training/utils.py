@@ -6,12 +6,7 @@ import pandas as pd
 class DataLoader_RegressionToy():
 
     def __init__(self, args):
-
-        assert args.dataset in ['five_joins_012345_5_12_filters_error_log10']
-
-        if args.dataset == 'five_joins_012345_5_12_filters_error_log10':
-            self.data = pd.read_csv('/home/bo/deep-ensembles-uncertainty/datasets/JOB_five_joins_training_dataset_400000_9_16filers_log15.csv')
-
+        self.data = pd.read_csv(args.dataset)
         self.column_names = self.data.columns
         self.num_rows = (int)(len(self.data)/1)
         print(self.num_rows)
@@ -41,6 +36,8 @@ class DataLoader_RegressionToy():
         # Standardize input features
         self.input_mean = np.mean(self.data_x, 0)
         self.input_std = np.std(self.data_x, 0)
+        epsilon = 1e-8
+        self.input_std = np.where(self.input_std == 0, epsilon, self.input_std)
         self.data_x_standardized = (self.data_x - self.input_mean)/self.input_std
 
         # Training data

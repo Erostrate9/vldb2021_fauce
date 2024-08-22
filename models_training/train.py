@@ -1,7 +1,7 @@
 import numpy as np
 import argparse
-import tensorflow as tf
-#import tensorflow.compat.v1 as tf
+# import tensorflow as tf
+import tensorflow.compat.v1 as tf
 import os
 import math
 #import matplotlib.pyplot as plt
@@ -17,8 +17,8 @@ from utils import DataLoader_RegressionToy_sinusoidal
 from utils import DataLoader_RegressionToy_sinusoidal_break
 from utils import DataLoader_RegressionToy_break
 
-#tf.disable_v2_behavior()
-os.environ['CUDA_VISIBLE_DEVICES'] = '1,2'
+tf.disable_v2_behavior()
+os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 
 def main():
 
@@ -26,6 +26,8 @@ def main():
     # Training Dataset
     parser.add_argument('--dataset', type=str, default='five_joins_012345_5_12_filters_error_log10',
                         help='Name of the input training dataset')
+    parser.add_argument('--output', type=str, default='results/output.csv',
+                        help='Path of output file')
     # Ensemble size
     parser.add_argument('--ensemble_size', type=int, default=10,
                         help='Size of the ensemble')
@@ -154,7 +156,7 @@ def train_ensemble(args):
         test_ensemble(ensemble, sess, dataLoader)
 
 
-def test_ensemble(ensemble, sess, dataLoader):
+def test_ensemble(ensemble, sess, dataLoader, output_path):
     test_xs, test_ys = dataLoader.get_test_data()
     min_val, max_val = dataLoader.get_min_max()
     print('min_val is : {}'.format(min_val))
@@ -195,7 +197,7 @@ def test_ensemble(ensemble, sess, dataLoader):
     final_test_error_cols_num = final_test_error_write.shape[1]
     final_test_error_cols_name = ['error{}'.format(i) for i in range(final_test_error_cols_num)]
     final_test_error_dataToCSV = DataFrame(final_test_error_write, columns = final_test_error_cols_name)
-    final_test_error_dataToCSV.to_csv('/home/bo/deep-ensembles-uncertainty/results/version2_five_joins_400000_9_16_filters_error_log15_itr20k_train400k_ens10_128_256_512_512_lre-4_xavier.csv', escapechar=None)
+    final_test_error_dataToCSV.to_csv(output_path, escapechar=None)
     print('Final testing error write is done!')
     
     #plt.plot(test_xs_scaled, test_ys, 'b-')
