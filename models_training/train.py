@@ -59,8 +59,8 @@ def main():
     parser.add_argument('--test_ratio', type=float, default=0.1,
                         help='Keep probability for test ratio')
     # Number of data to be tested after training
-    parser.add_argument('--num_test_data', type=int, default=6000,
-                        help='The number of data to be tested')
+    # parser.add_argument('--num_test_data', type=int, default=6000,
+    #                     help='The number of data to be tested')
     # Beta for avoiding the NaN for the loss
     parser.add_argument('--beta', type=float, default=1e-3,
                         help='This small number added into the loss for avoiding Nan')
@@ -153,10 +153,10 @@ def train_ensemble(args):
                     sess.run(tf.assign(model.lr, args.learning_rate * (args.decay_rate ** (itr/300))))
                     print('itr: {}, nll: {}'.format(itr, nll))
 
-        test_ensemble(ensemble, sess, dataLoader, args.output)
+        test_ensemble(ensemble, sess, dataLoader, args)
 
 
-def test_ensemble(ensemble, sess, dataLoader, output_path):
+def test_ensemble(ensemble, sess, dataLoader, args):
     test_xs, test_ys = dataLoader.get_test_data()
     min_val, max_val = dataLoader.get_min_max()
     print('min_val is : {}'.format(min_val))
@@ -174,10 +174,11 @@ def test_ensemble(ensemble, sess, dataLoader, output_path):
 
     test_ys1 = [i * (max_val - min_val) + min_val for i in test_ys]
     test_ys2 = [np.round(np.power(15, i)) for i in test_ys1]
-    
+    print('len(test_ys1):', len(test_ys1))
+    print('len(test_ys2):', len(test_ys2))
     final_error = []
 
-    for i in range(2000):
+    for i in range(len(test_ys2)):
         temp_estimate_val = estimate_mean2[i]
         temp_real_val = test_ys2[i]
 
@@ -197,7 +198,7 @@ def test_ensemble(ensemble, sess, dataLoader, output_path):
     final_test_error_cols_num = final_test_error_write.shape[1]
     final_test_error_cols_name = ['error{}'.format(i) for i in range(final_test_error_cols_num)]
     final_test_error_dataToCSV = DataFrame(final_test_error_write, columns = final_test_error_cols_name)
-    final_test_error_dataToCSV.to_csv(output_path, escapechar=None)
+    final_test_error_dataToCSV.to_csv(args.output, escapechar=None)
     print('Final testing error write is done!')
     
     #plt.plot(test_xs_scaled, test_ys, 'b-')

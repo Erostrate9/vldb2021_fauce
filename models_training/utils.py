@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import math
 #import ipdb
 
 
@@ -55,7 +56,7 @@ class DataLoader_RegressionToy():
         self.test_data_y = self.data_y[self.num_train_data:, :]
 
         self.batch_size = args.batch_size
-        self.num_test_data = args.num_test_data
+        self.num_test_data = self.num_rows-self.num_train_data
 
 
     def next_batch(self):
