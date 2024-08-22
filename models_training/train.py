@@ -153,7 +153,7 @@ def train_ensemble(args):
                     sess.run(tf.assign(model.lr, args.learning_rate * (args.decay_rate ** (itr/300))))
                     print('itr: {}, nll: {}'.format(itr, nll))
 
-        test_ensemble(ensemble, sess, dataLoader)
+        test_ensemble(ensemble, sess, dataLoader, args.output)
 
 
 def test_ensemble(ensemble, sess, dataLoader, output_path):
