@@ -4,12 +4,12 @@ import argparse
 import tensorflow.compat.v1 as tf
 import os
 import math
+import pandas as pd
 #import matplotlib.pyplot as plt
 
 #import ipdb
 from pandas import DataFrame
 from model import MLPGaussianRegressor
-from model import MLPDropoutGaussianRegressor
 
 from utils import DataLoader_RegressionToy
 from utils import DataLoader_RegressionToy_withKink
@@ -68,7 +68,6 @@ def main():
                         help='Final test after training')
     args = parser.parse_args()
     train_ensemble(args)
-    # train_dropout(args)
 
 
 def ensemble_mean_var(ensemble, xs, sess):
@@ -97,33 +96,6 @@ def ensemble_mean_var(ensemble, xs, sess):
     print('The total number of none nan value is: {}'.format(total))
     return en_mean, en_var
 
-
-def dropout_mean_var(model, xs, sess, args):
-    en_mean = 0
-    en_var = 0
-    total = 0
-
-    for i in range(args.ensemble_size):
-        # NOTE using dropout at test time as well
-        feed = {model.input_data: xs, model.dr: args.keep_prob}
-        mean, var = sess.run([model.mean, model.var], feed)
-        
-        is_mean_nan = np.isnan(mean).any()
-        is_var_nan = np.isnan(var).any()
-
-        if is_mean_nan == False and is_var_nan == False:
-            en_mean += mean
-            en_var += var + mean**2
-            total += 1
-        else:
-            continue
-
-    en_mean /= total
-    en_var /= total
-    en_var -= en_mean**2
-    return en_mean, en_var
-
-
 def train_ensemble(args):
     
     # Input data
@@ -140,33 +112,29 @@ def train_ensemble(args):
     model_dir = f'models/{output_filename}/'
     if not os.path.exists(model_dir):
         os.makedirs(model_dir)
-    saver = tf.train.Saver()
-    model_path = os.path.join(model_dir, 'model.ckpt')
-
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
-
         for model in ensemble:
             sess.run(tf.assign(model.output_mean, dataLoader.target_mean))
             sess.run(tf.assign(model.output_std, dataLoader.target_std))
 
         for itr in range(args.max_iter):
-
             for model in ensemble:
-
                 x, y = dataLoader.next_batch()
-
                 feed = {model.input_data: x, model.target_data: y}
                 _, nll, m, v = sess.run([model.train_op, model.nll, model.mean, model.var], feed)
                 if itr % 300 == 0:
                     sess.run(tf.assign(model.lr, args.learning_rate * (args.decay_rate ** (itr/300))))
                     print('itr: {}, nll: {}'.format(itr, nll))
-        saver.save(sess, model_path)
+        for model in ensemble:
+          model.save_model(sess, model_dir)
         # load the model
-        saver.restore(sess, model_path)
-        print('Restored model from {}'.format(model_path))
+        for model in ensemble:
+          model.load_model(sess, model_dir)
+        print('Restored model from {}'.format(model_dir))
         # final test
         test_ensemble(ensemble, sess, dataLoader, args)
+        test_ensemble_on_csv(ensemble, sess, dataLoader, args, args.final_test)
 
 
 def test_ensemble(ensemble, sess, dataLoader, args):
@@ -183,65 +151,30 @@ def test_ensemble(ensemble, sess, dataLoader, args):
     test_xs_scaled = dataLoader.input_mean + dataLoader.input_std*test_xs
 
     estimate_mean1 = [i * (max_val - min_val) + min_val for i in mean]
-    # estimate_mean2 = [np.round(np.power(2, i)) for i in estimate_mean1]
-    ###
-    for i in estimate_mean1:
-      if i > np.log(np.finfo(np.float64).max)/np.log(2):
-          print(f"Warning: Large value before power operation: {i}")
     estimate_mean2 = [np.round(np.power(2, i)) for i in estimate_mean1]
     print(f"estimate_mean2: {estimate_mean2}")
     ###
     test_ys1 = [i * (max_val - min_val) + min_val for i in test_ys]
-    # test_ys2 = [np.round(np.power(2, i)) for i in test_ys1]
-    ###
-    for i in test_ys1:
-      if i > np.log(np.finfo(np.float64).max)/np.log(2):
-          print(f"Warning: Large value before power operation: {i}")
     test_ys2 = [np.round(np.power(2, i)) for i in test_ys1]
-    print(f"test_ys2: {test_ys2}")
     ###
     print('len(test_ys1):', len(test_ys1))
     print('len(test_ys2):', len(test_ys2))
     final_error = []
 
-    # for i in range(len(test_ys2)):
-    #     temp_estimate_val = estimate_mean2[i]
-    #     temp_real_val = test_ys2[i]
-
-    #     if temp_estimate_val == 0 and temp_real_val != 0:
-    #         error = temp_real_val
-    #     elif temp_estimate_val != 0 and temp_real_val == 0:
-    #         error = temp_estimate_val
-    #     elif temp_estimate_val == 0 and temp_real_val == 0:
-    #         error = 1
-    #     elif temp_estimate_val != 0 and temp_real_val != 0:
-    #         error = max(temp_estimate_val/temp_real_val, temp_real_val/temp_estimate_val)
-
-    #     final_error.append(error)
-    ###
     for i in range(len(test_ys2)):
-      temp_estimate_val = estimate_mean2[i]
-      temp_real_val = test_ys2[i]
-      
-      if temp_real_val == 0:
-          print(f"Warning: temp_real_val is zero at index {i}")
-      if temp_estimate_val == 0:
-          print(f"Warning: temp_estimate_val is zero at index {i}")
-      
-      if temp_estimate_val == 0 and temp_real_val != 0:
-          error = temp_real_val
-      elif temp_estimate_val != 0 and temp_real_val == 0:
-          error = temp_estimate_val
-      elif temp_estimate_val == 0 and temp_real_val == 0:
-          error = 1
-      elif temp_estimate_val != 0 and temp_real_val != 0:
-          try:
-              error = max(temp_estimate_val/temp_real_val, temp_real_val/temp_estimate_val)
-          except Exception as e:
-              print(f"Error in division at index {i}: {e}")
-              error = np.nan  # Assign NaN if an error occurs
-      final_error.append(error)
-      ###
+        temp_estimate_val = estimate_mean2[i]
+        temp_real_val = test_ys2[i]
+
+        if temp_estimate_val == 0 and temp_real_val != 0:
+            error = temp_real_val
+        elif temp_estimate_val != 0 and temp_real_val == 0:
+            error = temp_estimate_val
+        elif temp_estimate_val == 0 and temp_real_val == 0:
+            error = 1
+        elif temp_estimate_val != 0 and temp_real_val != 0:
+            error = max(temp_estimate_val/temp_real_val, temp_real_val/temp_estimate_val)
+
+        final_error.append(error)
 
 
     final_test_error_write = np.array(final_error)
@@ -257,50 +190,57 @@ def test_ensemble(ensemble, sess, dataLoader, args):
     #plt.fill_between(test_xs_scaled[:, 0], lower[:, 0], upper[:, 0], color='yellow', alpha=0.5)
     #plt.show()
 
+def test_ensemble_on_csv(ensemble, sess, dataLoader, args, csv_path):
+    df = pd.read_csv(csv_path)
+    test_xs = df.iloc[:, :-1].values
+    test_ys = df.iloc[:, -1].values.reshape(-1,1)
+    min_val, max_val = dataLoader.get_min_max()
+    print('min_val is : {}'.format(min_val))
+    print('max_val is : {}'.format(max_val))
 
-def train_dropout(args):
-    
-    # Input data
-    dataLoader = DataLoader_RegressionToy(args)
-    num_features = dataLoader.get_num_features()
-
-    # Layer sizes
-    sizes = [num_features, 256, 512, 512, 2]
-
-    model = MLPDropoutGaussianRegressor(args, sizes, 'dropout_model')
-
-    with tf.compat.v1.Session() as sess:
-        sess.run(tf.compat.v1.global_variables_initializer())
-        sess.run(tf.compat.v1.assign(model.output_mean, dataLoader.target_mean))
-        sess.run(tf.compat.v1.assign(model.output_std, dataLoader.target_std))
-        for itr in range(args.max_iter):
-
-            x, y = dataLoader.next_batch()
-
-            feed = {model.input_data: x, model.target_data: y, model.dr: args.keep_prob}
-            _, nll = sess.run([model.train_op, model.nll], feed)
-
-            if itr % 300 == 0:
-                sess.run(tf.compat.v1.assign(model.lr, args.learning_rate * (args.decay_rate ** (itr/300))))
-                print('itr: {}, nll: {}'.format(itr, nll))
-
-        test_dropout(model, sess, dataLoader, args)
-
-
-def test_dropout(model, sess, dataLoader, args):
-    test_xs, test_ys = dataLoader.get_test_data()
-    mean, var = dropout_mean_var(model, test_xs, sess, args)
+    mean, var = ensemble_mean_var(ensemble, test_xs, sess)
     std = np.sqrt(var)
     upper = mean + 3*std
     lower = mean - 3*std
-
+    
     test_xs_scaled = dataLoader.input_mean + dataLoader.input_std*test_xs
 
-    #plt.plot(test_xs_scaled, test_ys, 'b-')
-    #plt.plot(test_xs_scaled, mean, 'r-')
+    estimate_mean1 = [i * (max_val - min_val) + min_val for i in mean]
+    print(f"estimate_mean1: {estimate_mean1}")
+    estimate_mean2 = [np.round(np.power(2, i)) for i in estimate_mean1]
+    print(f"estimate_mean2: {estimate_mean2}")
+    ###
+    test_ys1 = [i * (max_val - min_val) + min_val for i in test_ys]
+    test_ys2 = [np.round(np.power(2, i)) for i in test_ys1]
+    ###
+    print('len(test_ys1):', len(test_ys1))
+    print('len(test_ys2):', len(test_ys2))
+    final_error = []
 
-    #plt.fill_between(test_xs_scaled[:, 0], lower[:, 0], upper[:, 0], color='yellow', alpha=0.5)
-    #plt.show()
+    for i in range(len(test_ys2)):
+        temp_estimate_val = estimate_mean2[i]
+        temp_real_val = test_ys2[i]
+
+        if temp_estimate_val == 0 and temp_real_val != 0:
+            error = temp_real_val
+        elif temp_estimate_val != 0 and temp_real_val == 0:
+            error = temp_estimate_val
+        elif temp_estimate_val == 0 and temp_real_val == 0:
+            error = 1
+        elif temp_estimate_val != 0 and temp_real_val != 0:
+            error = max(temp_estimate_val/temp_real_val, temp_real_val/temp_estimate_val)
+
+        final_error.append(error)
+
+    final_test_error_write = np.array(final_error)
+    final_test_error_cols_name = ['error']
+    final_test_error_data = DataFrame(final_test_error_write, columns = final_test_error_cols_name)
+    f_input = os.path.splitext(os.path.basename(args.dataset))[0]
+    f_output = os.path.splitext(os.path.basename(csv_path))[0]
+    output_dir = os.path.dirname(args.output)
+    result_path = os.path.join(output_dir, f"trained_on_{f_input}_tested_on_{f_output}.csv")
+    final_test_error_data.to_csv(result_path, escapechar=None)
+    print('Final testing error write is done!')
 
 if __name__ == '__main__':
     main()
