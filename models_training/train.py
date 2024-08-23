@@ -5,6 +5,7 @@ import tensorflow.compat.v1 as tf
 import os
 import math
 import pandas as pd
+import time
 #import matplotlib.pyplot as plt
 
 #import ipdb
@@ -118,7 +119,8 @@ def train_ensemble(args):
             sess.run(tf.assign(model.output_mean, dataLoader.target_mean))
             sess.run(tf.assign(model.output_std, dataLoader.target_std))
 
-        for itr in range(args.max_iter):
+        start_time = time.time()
+        for itr in range(args.max_iter+1):
             for model in ensemble:
                 x, y = dataLoader.next_batch()
                 feed = {model.input_data: x, model.target_data: y}
@@ -126,6 +128,9 @@ def train_ensemble(args):
                 if itr % 300 == 0:
                     sess.run(tf.assign(model.lr, args.learning_rate * (args.decay_rate ** (itr/300))))
                     print('itr: {}, nll: {}'.format(itr, nll))
+        execution_time = time.time() - start_time
+        print(f"Training time: {execution_time:.2f} seconds")
+
         for model in ensemble:
           model.save_model(sess, model_dir)
         # load the model
@@ -133,8 +138,15 @@ def train_ensemble(args):
           model.load_model(sess, model_dir)
         print('Restored model from {}'.format(model_dir))
         # final test
+        start_time = time.time()
         test_ensemble(ensemble, sess, dataLoader, args)
+        execution_time = time.time() - start_time
+        print(f"Test Execution time: {execution_time:.2f} seconds")
+
+        start_time = time.time()
         test_ensemble_on_csv(ensemble, sess, dataLoader, args, args.final_test)
+        execution_time = time.time() - start_time
+        print(f"Final Test Execution time: {execution_time:.2f} seconds")
 
 
 def test_ensemble(ensemble, sess, dataLoader, args):
