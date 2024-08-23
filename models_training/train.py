@@ -64,6 +64,8 @@ def main():
     # Beta for avoiding the NaN for the loss
     parser.add_argument('--beta', type=float, default=1e-3,
                         help='This small number added into the loss for avoiding Nan')
+    parser.add_argument('--final_test', type=str, default='datasets/job-light.csv',
+                        help='Final test after training')
     args = parser.parse_args()
     train_ensemble(args)
     # train_dropout(args)
