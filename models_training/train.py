@@ -210,23 +210,24 @@ def test_ensemble_on_csv(ensemble, sess, dataLoader, args, csv_path):
     print('min_val is : {}'.format(min_val))
     print('max_val is : {}'.format(max_val))
 
+    # Standardize input features
+    # test_ys = (test_ys - dataLoader.min_val)/(dataLoader.max_val - dataLoader.min_val)
+    test_xs = (test_xs - dataLoader.input_mean)/dataLoader.input_std
+
     mean, var = ensemble_mean_var(ensemble, test_xs, sess)
     std = np.sqrt(var)
     upper = mean + 3*std
     lower = mean - 3*std
-    
-    test_xs_scaled = dataLoader.input_mean + dataLoader.input_std*test_xs
+  
+    # test_xs_scaled = dataLoader.input_mean + dataLoader.input_std*data_x_standardized
 
     estimate_mean1 = [i * (max_val - min_val) + min_val for i in mean]
-    print(f"estimate_mean1: {estimate_mean1}")
     estimate_mean2 = [np.round(np.power(2, i)) for i in estimate_mean1]
-    print(f"estimate_mean2: {estimate_mean2}")
     ###
-    test_ys1 = [i * (max_val - min_val) + min_val for i in test_ys]
-    test_ys2 = [np.round(np.power(2, i)) for i in test_ys1]
+    # test_ys1 = [i * (max_val - min_val) + min_val for i in test_ys]
+    test_ys2 = [np.round(np.power(2, i)) for i in test_ys]
     ###
-    print('len(test_ys1):', len(test_ys1))
-    print('len(test_ys2):', len(test_ys2))
+    # print('len(test_ys1):', len(test_ys1))
     final_error = []
 
     for i in range(len(test_ys2)):

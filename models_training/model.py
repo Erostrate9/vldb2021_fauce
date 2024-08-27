@@ -99,6 +99,5 @@ class MLPGaussianRegressor():
     def load_model(self, session, model_dir):
         model_f = self.model_scope
         load_path = os.path.join(model_dir, self.model_scope, model_f)
-        print(f"load_path: {load_path}")
         self.saver.restore(session, load_path)
         print(f"Model {load_path} restored.")
