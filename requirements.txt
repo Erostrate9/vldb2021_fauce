@@ -1,7 +1,7 @@
-networkx
-numpy
-gensim
-tensorflow
-joblib
-scikit-learn
 pandas
+networkx==1.11
+numpy==1.11.2
+gensim==0.12.4
+tensorflow== 0.12.1
+joblib
+scikit-learn 
