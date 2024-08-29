@@ -1,4 +1,9 @@
 # vldb2021_fauce
+## Overview
+Model Size: 10 MLPs with feature size of [num_features, 128, 256, 512, 512, 2]. So, the total number of parameters is:
+$$numberOfEnsembles\times ((\text{num features} \times 128) + 427008 + 1410) = 10*439,818 = 4.4M$$
+training  and inference overheads: It used 0.4GB GPU RAM and spent around 10 mins to train 300 iterations with L4 GPU.
+
 The source code includes two parts: (1)queries featurization; (2) models training.
 
 #### Queries Featurization 
